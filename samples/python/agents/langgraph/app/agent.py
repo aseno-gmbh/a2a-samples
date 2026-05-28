@@ -7,7 +7,6 @@ import httpx
 
 from langchain_core.messages import AIMessage, ToolMessage
 from langchain_core.tools import tool
-from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_openai import ChatOpenAI
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.prebuilt import create_react_agent
@@ -37,7 +36,7 @@ def get_exchange_rate(
     """
     try:
         response = httpx.get(
-            f'https://api.frankfurter.app/{currency_date}',
+            f'https://api.frankfurter.dev/v1/{currency_date}',
             params={'from': currency_from, 'to': currency_to},
         )
         response.raise_for_status()
@@ -77,16 +76,12 @@ class CurrencyAgent:
     )
 
     def __init__(self):
-        model_source = os.getenv('model_source', 'google')
-        if model_source == 'google':
-            self.model = ChatGoogleGenerativeAI(model='gemini-2.0-flash')
-        else:
-            self.model = ChatOpenAI(
-                model=os.getenv('TOOL_LLM_NAME'),
-                openai_api_key=os.getenv('API_KEY', 'EMPTY'),
-                openai_api_base=os.getenv('TOOL_LLM_URL'),
-                temperature=0,
-            )
+        self.model = ChatOpenAI(
+            model=os.getenv('LITELLM_MODEL', 'gpt-4o-mini'),
+            openai_api_key=os.getenv('LITELLM_API_KEY', 'EMPTY'),
+            openai_api_base=os.getenv('LITELLM_BASE_URL', 'http://localhost:4000'),
+            temperature=0,
+        )
         self.tools = [get_exchange_rate]
 
         self.graph = create_react_agent(

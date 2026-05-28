@@ -3,19 +3,9 @@ import logging
 from a2a.server.agent_execution import AgentExecutor, RequestContext
 from a2a.server.events import EventQueue
 from a2a.server.tasks import TaskUpdater
-from a2a.types import (
-    InternalError,
-    InvalidParamsError,
-    Part,
-    TaskState,
-    TextPart,
-    UnsupportedOperationError,
-)
-from a2a.utils import (
-    new_agent_text_message,
-    new_task,
-)
-from a2a.utils.errors import ServerError
+from a2a.types.a2a_pb2 import Part, TaskState
+from a2a.helpers import new_task_from_user_message, new_text_message
+from a2a.utils.errors import InternalError, InvalidParamsError, UnsupportedOperationError
 
 from app.agent import CurrencyAgent
 
@@ -35,14 +25,13 @@ class CurrencyAgentExecutor(AgentExecutor):
         context: RequestContext,
         event_queue: EventQueue,
     ) -> None:
-        error = self._validate_request(context)
-        if error:
-            raise ServerError(error=InvalidParamsError())
+        if not context.message:
+            raise InvalidParamsError()
 
         query = context.get_user_input()
         task = context.current_task
         if not task:
-            task = new_task(context.message)  # type: ignore
+            task = new_task_from_user_message(context.message)
             await event_queue.enqueue_event(task)
         updater = TaskUpdater(event_queue, task.id, task.context_id)
         try:
@@ -52,27 +41,18 @@ class CurrencyAgentExecutor(AgentExecutor):
 
                 if not is_task_complete and not require_user_input:
                     await updater.update_status(
-                        TaskState.working,
-                        new_agent_text_message(
-                            item['content'],
-                            task.context_id,
-                            task.id,
-                        ),
+                        TaskState.TASK_STATE_WORKING,
+                        new_text_message(item['content']),
                     )
                 elif require_user_input:
                     await updater.update_status(
-                        TaskState.input_required,
-                        new_agent_text_message(
-                            item['content'],
-                            task.context_id,
-                            task.id,
-                        ),
-                        final=True,
+                        TaskState.TASK_STATE_INPUT_REQUIRED,
+                        new_text_message(item['content']),
                     )
                     break
                 else:
                     await updater.add_artifact(
-                        [Part(root=TextPart(text=item['content']))],
+                        [Part(text=item['content'])],
                         name='conversion_result',
                     )
                     await updater.complete()
@@ -80,12 +60,9 @@ class CurrencyAgentExecutor(AgentExecutor):
 
         except Exception as e:
             logger.error(f'An error occurred while streaming the response: {e}')
-            raise ServerError(error=InternalError()) from e
-
-    def _validate_request(self, context: RequestContext) -> bool:
-        return False
+            raise InternalError() from e
 
     async def cancel(
-        self, context: RequestContext, event_queue: EventQueue
+        self, context: RequestContext, event_queue: EventQueue  # noqa: ARG002
     ) -> None:
-        raise ServerError(error=UnsupportedOperationError())
+        raise UnsupportedOperationError()
