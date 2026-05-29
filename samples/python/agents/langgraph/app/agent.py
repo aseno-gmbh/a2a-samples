@@ -1,3 +1,4 @@
+import logging
 import os
 
 from collections.abc import AsyncIterable
@@ -13,6 +14,7 @@ from langgraph.prebuilt import create_react_agent
 from pydantic import BaseModel
 
 
+logger = logging.getLogger(__name__)
 memory = MemorySaver()
 
 
@@ -34,6 +36,9 @@ def get_exchange_rate(
         A dictionary containing the exchange rate data, or an error message if
         the request fails.
     """
+    logger.debug(
+        'Fetching exchange rate: %s -> %s on %s', currency_from, currency_to, currency_date
+    )
     try:
         response = httpx.get(
             f'https://api.frankfurter.dev/v1/{currency_date}',
@@ -43,11 +48,15 @@ def get_exchange_rate(
 
         data = response.json()
         if 'rates' not in data:
+            logger.warning('Unexpected API response format: %s', data)
             return {'error': 'Invalid API response format.'}
+        logger.debug('Exchange rate result: %s', data)
         return data
     except httpx.HTTPError as e:
+        logger.error('Exchange rate API request failed: %s', e)
         return {'error': f'API request failed: {e}'}
     except ValueError:
+        logger.error('Invalid JSON from exchange rate API')
         return {'error': 'Invalid JSON response from API.'}
 
 
@@ -76,10 +85,13 @@ class CurrencyAgent:
     )
 
     def __init__(self):
+        model_name = os.getenv('LITELLM_MODEL', 'gpt-4o-mini')
+        base_url = os.getenv('LITELLM_BASE_URL', 'http://localhost:4000')
+        logger.info('Initializing CurrencyAgent with model=%s base_url=%s', model_name, base_url)
         self.model = ChatOpenAI(
-            model=os.getenv('LITELLM_MODEL', 'gpt-4o-mini'),
-            openai_api_key=os.getenv('LITELLM_API_KEY', 'EMPTY'),
-            openai_api_base=os.getenv('LITELLM_BASE_URL', 'http://localhost:4000'),
+            model=model_name,
+            api_key=os.getenv('LITELLM_API_KEY', 'EMPTY'),
+            base_url=base_url,
             temperature=0,
         )
         self.tools = [get_exchange_rate]

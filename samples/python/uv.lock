@@ -15,7 +15,6 @@ members = [
     "a2a-samples-marvin",
     "ag2-a2a",
     "airbnb-planner-multiagent",
-    "timestamp-ext",
     "traceability-ext",
     "veo-video-sample-agent",
 ]
@@ -73,7 +72,6 @@ dependencies = [
     { name = "google-genai" },
     { name = "litellm" },
     { name = "python-dotenv" },
-    { name = "timestamp-ext" },
 ]
 
 [package.metadata]
@@ -84,7 +82,6 @@ requires-dist = [
     { name = "google-genai", specifier = ">=1.27.0" },
     { name = "litellm" },
     { name = "python-dotenv", specifier = ">=1.1.0" },
-    { name = "timestamp-ext", editable = "extensions/timestamp" },
 ]
 
 [[package]]
@@ -128,7 +125,6 @@ dependencies = [
     { name = "a2a-sdk" },
     { name = "google-adk" },
     { name = "google-genai" },
-    { name = "timestamp-ext" },
 ]
 
 [package.metadata]
@@ -136,7 +132,6 @@ requires-dist = [
     { name = "a2a-sdk", specifier = ">=0.3.0" },
     { name = "google-adk", specifier = ">=1.7.0" },
     { name = "google-genai", specifier = ">=1.9.0" },
-    { name = "timestamp-ext", editable = "extensions/timestamp" },
 ]
 
 [[package]]
@@ -5007,17 +5002,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/3b/17/a0fc51aefb66b7b5261ca1314afa83df0106b033f783f9a7bcbe8e741494/tiktoken-0.11.0-cp313-cp313-musllinux_1_2_x86_64.whl", hash = "sha256:94f984c9831fd32688aef4348803b0905d4ae9c432303087bae370dc1381a2b8", size = 1244057, upload-time = "2025-08-08T23:57:57.628Z" },
     { url = "https://files.pythonhosted.org/packages/50/79/bcf350609f3a10f09fe4fc207f132085e497fdd3612f3925ab24d86a0ca0/tiktoken-0.11.0-cp313-cp313-win_amd64.whl", hash = "sha256:2177ffda31dec4023356a441793fed82f7af5291120751dee4d696414f54db0c", size = 883901, upload-time = "2025-08-08T23:57:59.359Z" },
 ]
-
-[[package]]
-name = "timestamp-ext"
-version = "0.1.0"
-source = { editable = "extensions/timestamp" }
-dependencies = [
-    { name = "a2a-sdk" },
-]
-
-[package.metadata]
-requires-dist = [{ name = "a2a-sdk", specifier = ">=0.3.0" }]
 
 [[package]]
 name = "tokenizers"
