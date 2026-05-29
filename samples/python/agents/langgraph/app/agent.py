@@ -8,7 +8,7 @@ import httpx
 
 from langchain_core.messages import AIMessage, ToolMessage
 from langchain_core.tools import tool
-from langchain_openai import ChatOpenAI
+from langchain_litellm import ChatLiteLLM
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.prebuilt import create_react_agent
 from pydantic import BaseModel
@@ -88,10 +88,10 @@ class CurrencyAgent:
         model_name = os.getenv('LITELLM_MODEL', 'gpt-4o-mini')
         base_url = os.getenv('LITELLM_BASE_URL', 'http://localhost:4000')
         logger.info('Initializing CurrencyAgent with model=%s base_url=%s', model_name, base_url)
-        self.model = ChatOpenAI(
+        self.model = ChatLiteLLM(
             model=model_name,
             api_key=os.getenv('LITELLM_API_KEY', 'EMPTY'),
-            base_url=base_url,
+            api_base=base_url,
             temperature=0,
         )
         self.tools = [get_exchange_rate]
