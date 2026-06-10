@@ -5,16 +5,16 @@ description = "Sample LangGraph currency agent with A2A Protocol"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "click>=8.1.8",
     "httpx>=0.28.1",
     "langgraph>=0.3.18",
     "pydantic>=2.10.6",
     "python-dotenv>=1.1.0",
-    "uvicorn>=0.34.2",
-    "sse-starlette>=2.3.6",
-    "starlette>=0.46.2",
+    "fastapi>=0.115.0",
+    "hypercorn>=0.17.3",
+    "restate-sdk>=0.9.0",
     "a2a-sdk>=1.0.0",
     "langchain-litellm>=0.6.6",
+    "botocore>=1.43.17",
 ]
 
 [tool.hatch.build.targets.wheel]
